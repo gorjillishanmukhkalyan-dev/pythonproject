@@ -1,0 +1,122 @@
+import json
+import os
+
+FILE_NAME = "students.json"
+
+class StudentManagementSystem:
+    def __init__(self):
+        self.students = {}
+        self.load_data()
+
+    def load_data(self):
+        if os.path.exists(FILE_NAME):
+            with open(FILE_NAME, "r") as file:
+                self.students = json.load(file)
+
+    def save_data(self):
+        with open(FILE_NAME, "w") as file:
+            json.dump(self.students, file, indent=4)
+
+    def add_student(self):
+        roll = input("Enter Roll Number: ")
+
+        if roll in self.students:
+            print("Student already exists!")
+            return
+
+        name = input("Enter Name: ")
+        age = input("Enter Age: ")
+        course = input("Enter Course: ")
+
+        self.students[roll] = {
+            "Name": name,
+            "Age": age,
+            "Course": course
+        }
+
+        self.save_data()
+        print("Student Added Successfully!")
+
+    def view_students(self):
+        if not self.students:
+            print("No student records found.")
+            return
+
+        print("\n{:<10} {:<20} {:<10} {:<15}".format("Roll", "Name", "Age", "Course"))
+        print("-" * 60)
+
+        for roll, details in self.students.items():
+            print("{:<10} {:<20} {:<10} {:<15}".format(
+                roll,
+                details["Name"],
+                details["Age"],
+                details["Course"]
+            ))
+
+    def search_student(self):
+        roll = input("Enter Roll Number: ")
+
+        if roll in self.students:
+            print("\nStudent Details")
+            print("Roll:", roll)
+            print("Name:", self.students[roll]["Name"])
+            print("Age:", self.students[roll]["Age"])
+            print("Course:", self.students[roll]["Course"])
+        else:
+            print("Student Not Found!")
+
+    def update_student(self):
+        roll = input("Enter Roll Number: ")
+
+        if roll in self.students:
+            self.students[roll]["Name"] = input("Enter New Name: ")
+            self.students[roll]["Age"] = input("Enter New Age: ")
+            self.students[roll]["Course"] = input("Enter New Course: ")
+
+            self.save_data()
+            print("Student Updated Successfully!")
+        else:
+            print("Student Not Found!")
+
+    def delete_student(self):
+        roll = input("Enter Roll Number: ")
+
+        if roll in self.students:
+            del self.students[roll]
+            self.save_data()
+            print("Student Deleted Successfully!")
+        else:
+            print("Student Not Found!")
+
+def main():
+    sms = StudentManagementSystem()
+
+    while True:
+        print("\n===== Student Management System =====")
+        print("1. Add Student")
+        print("2. View Students")
+        print("3. Search Student")
+        print("4. Update Student")
+        print("5. Delete Student")
+        print("6. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            sms.add_student()
+        elif choice == "2":
+            sms.view_students()
+        elif choice == "3":
+            sms.search_student()
+        elif choice == "4":
+            sms.update_student()
+        elif choice == "5":
+            sms.delete_student()
+        elif choice == "6":
+            print("Thank You!")
+            break
+        else:
+            print("Invalid Choice!")
+
+if __name__ == "__main__":
+    main()
