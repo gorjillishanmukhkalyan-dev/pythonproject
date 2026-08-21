@@ -1,0 +1,323 @@
+import csv
+import os
+
+
+# --------------------------------------------------
+# Configuration
+# --------------------------------------------------
+
+INPUT_FILE = "students.csv"
+OUTPUT_FILE = "processed_students.csv"
+
+
+# --------------------------------------------------
+# Create Sample CSV File
+# --------------------------------------------------
+
+def create_sample_file():
+    """Create a sample CSV file if it does not already exist."""
+
+    if os.path.exists(INPUT_FILE):
+        return
+
+    sample_data = [
+        ["ID", "Name", "Age", "Course", "Marks"],
+        ["101", "Shannu", "20", "Python", "85"],
+        ["102", "Vedha", "21", "Java", "92"],
+        ["103", "Deepak", "19", "Python", "76"],
+        ["104", "Reshma", "20", "Data Science", "88"],
+        ["105", "Munna", "22", "Python", "95"]
+    ]
+
+    try:
+        with open(INPUT_FILE, "w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerows(sample_data)
+
+        print(f"Sample file '{INPUT_FILE}' created successfully.")
+
+    except PermissionError:
+        print("Error: Permission denied while creating the file.")
+
+    except OSError as error:
+        print(f"File creation error: {error}")
+
+
+# --------------------------------------------------
+# Read CSV File
+# --------------------------------------------------
+
+def read_csv_file(filename):
+    """Read records from a CSV file."""
+
+    try:
+        with open(filename, "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            data = list(reader)
+
+        return data
+
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' was not found.")
+
+    except PermissionError:
+        print(f"Error: Permission denied while reading '{filename}'.")
+
+    except OSError as error:
+        print(f"File reading error: {error}")
+
+    return []
+
+
+# --------------------------------------------------
+# Display Data
+# --------------------------------------------------
+
+def display_data(data):
+    """Display CSV records in a readable table."""
+
+    if not data:
+        print("\nNo data available.")
+        return
+
+    print("\n" + "=" * 70)
+    print(
+        f"{'ID':<8}"
+        f"{'Name':<15}"
+        f"{'Age':<8}"
+        f"{'Course':<18}"
+        f"{'Marks':<8}"
+    )
+    print("=" * 70)
+
+    for row in data:
+        print(
+            f"{row['ID']:<8}"
+            f"{row['Name']:<15}"
+            f"{row['Age']:<8}"
+            f"{row['Course']:<18}"
+            f"{row['Marks']:<8}"
+        )
+
+    print("=" * 70)
+
+
+# --------------------------------------------------
+# Filter Data
+# --------------------------------------------------
+
+def filter_data(data):
+    """Filter records based on course."""
+
+    if not data:
+        print("No data available for filtering.")
+        return []
+
+    course = input("Enter course to filter: ").strip().lower()
+
+    filtered_data = [
+        row for row in data
+        if row["Course"].strip().lower() == course
+    ]
+
+    if not filtered_data:
+        print("No records found for that course.")
+
+    return filtered_data
+
+
+# --------------------------------------------------
+# Sort Data
+# --------------------------------------------------
+
+def sort_data(data):
+    """Sort records by selected field."""
+
+    if not data:
+        print("No data available for sorting.")
+        return []
+
+    print("\nSort by:")
+    print("1. Name")
+    print("2. Age")
+    print("3. Marks")
+
+    choice = input("Enter your choice: ").strip()
+
+    try:
+        if choice == "1":
+            return sorted(data, key=lambda row: row["Name"].lower())
+
+        elif choice == "2":
+            return sorted(data, key=lambda row: int(row["Age"]))
+
+        elif choice == "3":
+            return sorted(data, key=lambda row: float(row["Marks"]), reverse=True)
+
+        else:
+            print("Invalid sorting option.")
+            return data
+
+    except ValueError:
+        print("Error: Invalid numerical data in the file.")
+        return data
+
+
+# --------------------------------------------------
+# Calculate Summary
+# --------------------------------------------------
+
+def calculate_summary(data):
+    """Calculate and display data summary."""
+
+    if not data:
+        print("No data available for summary.")
+        return
+
+    try:
+        marks = [float(row["Marks"]) for row in data]
+
+        total_students = len(data)
+        highest_marks = max(marks)
+        lowest_marks = min(marks)
+        average_marks = sum(marks) / total_students
+
+        print("\n========== DATA SUMMARY ==========")
+        print(f"Total Students : {total_students}")
+        print(f"Highest Marks  : {highest_marks:.2f}")
+        print(f"Lowest Marks   : {lowest_marks:.2f}")
+        print(f"Average Marks  : {average_marks:.2f}")
+        print("==================================")
+
+    except (ValueError, KeyError):
+        print("Error: Unable to calculate summary because of invalid data.")
+
+
+# --------------------------------------------------
+# Export Data
+# --------------------------------------------------
+
+def export_data(data, filename):
+    """Export processed data to a new CSV file."""
+
+    if not data:
+        print("No data available to export.")
+        return
+
+    try:
+        with open(filename, "w", newline="", encoding="utf-8") as file:
+
+            fieldnames = data[0].keys()
+
+            writer = csv.DictWriter(
+                file,
+                fieldnames=fieldnames
+            )
+
+            writer.writeheader()
+            writer.writerows(data)
+
+        print(f"\nProcessed data exported to '{filename}' successfully.")
+
+    except PermissionError:
+        print(f"Error: Permission denied while writing '{filename}'.")
+
+    except OSError as error:
+        print(f"File writing error: {error}")
+
+
+# --------------------------------------------------
+# Search Data
+# --------------------------------------------------
+
+def search_data(data):
+    """Search for a student by name."""
+
+    if not data:
+        print("No data available for searching.")
+        return
+
+    name = input("Enter student name: ").strip().lower()
+
+    results = [
+        row for row in data
+        if name in row["Name"].lower()
+    ]
+
+    if results:
+        display_data(results)
+    else:
+        print("No matching student found.")
+
+
+# --------------------------------------------------
+# Main Program
+# --------------------------------------------------
+
+def main():
+
+    create_sample_file()
+
+    data = read_csv_file(INPUT_FILE)
+
+    if not data:
+        print("Unable to load data.")
+        return
+
+    while True:
+
+        print("\n==========================================")
+        print("       FILE HANDLING DATA SYSTEM")
+        print("==========================================")
+        print("1. Display All Data")
+        print("2. Filter Data")
+        print("3. Sort Data")
+        print("4. Search Student")
+        print("5. Calculate Summary")
+        print("6. Export Processed Data")
+        print("7. Reload File")
+        print("8. Exit")
+        print("==========================================")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            display_data(data)
+
+        elif choice == "2":
+            filtered_data = filter_data(data)
+            display_data(filtered_data)
+
+        elif choice == "3":
+            sorted_data = sort_data(data)
+            display_data(sorted_data)
+
+        elif choice == "4":
+            search_data(data)
+
+        elif choice == "5":
+            calculate_summary(data)
+
+        elif choice == "6":
+            export_data(data, OUTPUT_FILE)
+
+        elif choice == "7":
+            data = read_csv_file(INPUT_FILE)
+
+            if data:
+                print("File reloaded successfully.")
+
+        elif choice == "8":
+            print("Thank you for using the File Handling System.")
+            break
+
+        else:
+            print("Invalid choice. Please select 1-8.")
+
+
+# --------------------------------------------------
+# Program Entry Point
+# --------------------------------------------------
+
+if __name__ == "__main__":
+    main()
